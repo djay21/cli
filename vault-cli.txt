@@ -1,17 +1,105 @@
+# Set the Vault server address environment variable
 set VAULT_ADDR=http://vault.address.com
+
+# Set the Vault authentication token environment variable
 set VAULT_TOKEN=s.ekjfcbskbjkb
 
-
+# Create a new Vault token with a period of 10 minutes
 vault token create -period=10m
+
+# Log in to Vault using the provided token
 vault login -method=token s.3EW1N4cTQ6c4unuswVEYzZm3
+
+# List all available secrets engines with detailed information
 vault secrets list -detailed
+
+# Store a secret with key "my-secret" and value "yea" in the KV store under path "dt"
 vault kv put dt/my-secret my-value=yea
 
+# Retrieve the entire secret stored at "projects/models"
 vault kv get projects/models
+
+# Retrieve only the "passcode" field from the secret at "projects/models"
 vault kv get -field=passcode projects/models
 
+# Retrieves the latest version of the secret stored at `secret/hello`.
+vault kv get secret/hello 
 
+# Retrieves a specific version (version 2) of the secret at `secret/hello`.
+vault kv get -version=2 secret/hello 
 
+# Stores a new secret with key `user` and value `admin` at `secret/hello`.
+vault kv put secret/hello user=admin
+
+# Marks version 2 of the secret at `secret/hello` as deleted, allowing for undeletion.
+vault kv delete -versions=2 secret/hello 
+
+# Undeletes version 2 of the secret at `secret/hello`, restoring it.
+vault kv undelete -versions=2 secret/hello 
+
+# Permanently destroys version 2 of the secret at `secret/hello`.
+vault kv destroy -versions=2 secret/hello 
+
+# Deletes all metadata and versions of the secret at `secret/hello`.
+vault kv metadata delete secret/hello
+
+# Enables a new KV secrets engine at `demopath` with versioning.
+vault secrets enable -versions=2 -path=demopath kv
+
+# Disables the secrets engine mounted at `demopath`.
+vault secrets disable demopath
+
+# Renews a lease by incrementing its duration by 200 seconds for a specific credential path.
+vault lease renew -increment=200 demopatg/creds/adminrole/wjhbdwnelfnlkdwe
+
+# Revokes a lease for a specific credential path.
+vault lease revoke demopath/creds/adminrole/wodjebcjkbejk
+
+# Revokes a specific lease by its lease ID.
+vault lease revoke lease-id
+
+# Revokes all leases that share a prefix.
+vault lease revoke -prefix aws/ 
+
+# Encrypts a plaintext string using the key `demo-key`.
+vault write transit/encrypt/demo-key plaintext="base64encodedtest"
+
+# Decrypts a base64 encoded string using the key `demo-key`.
+vault write transit/decrypt/demo-key ciphertext="base64decodedtest"
+
+# Generates a TOTP key, extracts the barcode, and decodes it into a JPEG image file.
+vault write -field=barcode totp/keys/dheeru generate=true issuer=vault account_name=dheeru@internal >> decode
+cat decode | base64 -d >> totp.jpg
+
+# Reads the current TOTP code for the key `dheeru`.
+vault read totp/code/dheeru
+
+# Logs into Vault using the username/password authentication method.
+vault login -method=userpass username=admin password=password
+
+# Creates a new AppRole for Jenkins with a specific token policy.
+vault write auth/approle/role/jenkins -token_policies=jenkins-role-policy
+
+# Reads configuration details of the Jenkins AppRole.
+vault read auth/approle/role/jenkins 
+
+# Retrieves the role ID for the Jenkins AppRole.
+vault read auth/approle/role/jenkins/role-id 
+
+# Generates a secret ID for the Jenkins AppRole.
+vault write -f auth/approle/role/jenkins/secret-id 
+
+# Authenticates to Vault using an AppRole with role_id and secret_id.
+vault write auth/approle/login role_id="" secret_id=""
+
+# Displays the capabilities of the token for the `sys/` path.
+vault token capabilities sys/
+
+# Displays the capabilities of the token for the `cubbyhole/` path.
+vault token capabilities cubbyhole/
+
+# Displays the capabilities of a token by its value.
+vault token capabilities token_value
 
 vault.json
 {                                    

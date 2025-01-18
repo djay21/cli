@@ -1,0 +1,21 @@
+# Creates a new AWS Lambda function named testing-user-management with the Python 3.7 runtime, a ZIP deployment package (user.zip), a handler (index.handler), and an IAM role
+aws lambda create-function \
+    --function-name testing-user-management \
+    --runtime python3.7 \
+    --zip-file fileb://user.zip \
+    --handler index.handler \
+    --role arn:aws:iam::279328932:role/tableau-mgmt
+
+# Updates the code for the existing Lambda function testing-user-management by uploading the new deployment package (user.zip).
+aws lambda update-function-code \
+     --function-name testing-user-management \
+    --zip-file fileb://user.zip
+
+#Modifies the configuration of the testing-user-management Lambda function, including updating the runtime to Python 3.7, setting the handler to user-management.lambda_handler, adjusting the timeout to 180 seconds, and defining environment variables for key parameters like DELETE_IN_DAYS, ORG_ID, and others.
+aws lambda update-function-configuration \
+    --function-name testing-user-management \
+    --runtime python3.7 \
+    --handler user-management.lambda_handler \
+    --role arn:aws:iam::773601717826:role/tableau-management \
+    --timeout 180 \
+    --environment "Variables={DELETE_IN_DAYS=180}"

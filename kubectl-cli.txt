@@ -1,0 +1,5 @@
+# Retrieves and decodes a TLS certificate from a Kubernetes secret and checks validity
+kubectl -n qa get secret <secret-name> -o jsonpath='{.data.tls\.crt}' | base64 --decode > cert.crt && openssl x509 -in cert.crt -text -noout | grep Not
+
+# Retrieves and decodes a TLS certificate from a Kubernetes secret
+kubectl get secret <secret-name> -o jsonpath='{.data.tls\.crt}' | base64 --decode

@@ -1,0 +1,317 @@
+# List all Google Cloud Monitoring dashboards
+gcloud monitoring dashboards list
+
+# Delete a specific Google Cloud Monitoring dashboard (PII removed)
+gcloud monitoring dashboards delete projects/[REDACTED]/dashboards/[REDACTED]
+
+# Create another monitoring dashboard using a different configuration file
+gcloud monitoring dashboards create --config-from-file=abc.json
+
+# Create an infrastructure metrics dashboard using a configuration file
+gcloud monitoring dashboards create --config-from-file=abc.json
+
+# Search for all Google Cloud projects within a specific folder
+gcloud beta asset search-all-resources --asset-types=cloudresourcemanager.googleapis.com/Project \
+--scope=folders/246728922 | grep "projects" | cut -d "/" -f 5
+
+# Create a snapshot schedule policy for a VM disk
+gcloud compute resource-policies create snapshot-schedule [REDACTED]-vm-schedule \
+    --description "Snapshot schedule for VM disk" \
+    --max-retention-days 30 \
+    --start-time 22:00 \
+    --weekly-schedule saturday \
+    --region asia-south1 \
+    --guest-flush \
+    --on-source-disk-delete keep-auto-snapshots \
+    --storage-location asia-south2 \
+    --project [REDACTED]
+
+# Add a resource policy to a disk in specified zone and project
+gcloud compute disks add-resource-policies [REDACTED]-disk \
+    --resource-policies [REDACTED] \
+    --zone asia-south1-a \
+    --project [REDACTED]
+
+# Create a security policy rule to allow traffic from all internet sources
+gcloud compute security-policies rules create 1016 \
+    --security-policy [REDACTED]-armor-policy \
+    --description "Allow traffic from all internet" \
+    --src-ip-ranges "0.0.0.0/0" \
+    --action "allow"
+
+# Describe a specific security policy
+gcloud compute security-policies describe [REDACTED]-armor-policy
+
+# Create a security policy rule to allow specific IP ranges
+gcloud compute security-policies rules create 1014 \
+    --security-policy [REDACTED]-armor-policy \
+    --description "Allow IP" \
+    --src-ip-ranges "172.0.0.0/12" \
+    --action "allow"
+
+# Create another security policy rule to allow different IP ranges
+gcloud compute security-policies rules create 1015 \
+    --security-policy [REDACTED]-armor-policy \
+    --description "Allow IP" \
+    --src-ip-ranges "66.0.0.0/24" \
+    --action "allow"
+
+# to download all the policies in json format 
+ for i in $(gcloud alpha monitoring policies list | grep -E "name\:" | grep -vE conditions | cut -d ":" -f 2);do gcloud alpha monitoring policies describe $i 
+--format json > "$(echo $i | cut -d "/" -f 4).json" ; done
+
+# Resize a managed instance group to 0 instances in a specified region
+gcloud compute instance-groups managed resize [REDACTED]-mig-2b6 --size 0 --region asia-south1
+
+# Turn off autoscaling for a specific managed instance group
+gcloud compute instance-groups managed set-autoscaling [REDACTED]-mig-2b6 --region asia-south1 --mode off --max-num-replicas 2 --min-num-replicas 0
+
+# Turn off autoscaling for another managed instance group with minimum and maximum replicas set to 2
+gcloud compute instance-groups managed set-autoscaling [REDACTED]-mig --region asia-south2 --mode off --max-num-replicas 2 --min-num-replicas 2
+
+# Disable autoscaling for a different managed instance group with specific replica settings
+gcloud compute instance-groups managed set-autoscaling [REDACTED]-mig --region asia-south1 --mode off --max-num-replicas 2 --min-num-replicas 2
+
+# List all security policies in the project
+gcloud compute security-policies list
+
+
+# Create a security policy rule allowing traffic from specified IP ranges
+gcloud compute security-policies rules create 1012 \
+    --security-policy [REDACTED]-armor-policy \
+    --description "Allow traffic from IP" \
+    --src-ip-ranges "192.0.2.0/24,192.168.0.2" \
+    --action "allow"
+
+# Describe the security policy to check the rules
+gcloud compute security-policies describe [REDACTED]-armor-policy
+
+# Delete a specific security policy rule by its priority number
+gcloud compute security-policies rules delete 1012 --security-policy [REDACTED]-armor-policy
+
+# Create a firewall rule to allow SSH access from specified IP range
+gcloud compute firewall-rules create allow-ssh --allow=tcp:22 --source-ranges=35.235.240.0/20 --description="Allow SSH"
+
+# Check timeout settings for load balancer backends
+for i in $(gcloud compute forwarding-rules list | awk '{print $5}' | cut -d "/" -f 3 | grep -Ev "k8s|TARGET"); do
+    echo "$i :$(gcloud compute backend-services describe $i | grep timeout | cut -d ":" -f 2)";
+done
+
+# Update the size of a Redis instance in a specific region
+gcloud redis instances update [REDACTED] --size 2 --region asia-south1
+
+# Update the tier of a SQL instance
+gcloud sql instances patch [REDACTED] --tier db-custom-2-8192
+
+# Create a new compute instance with a specified disk and network tags
+gcloud compute instances create test --disk name=test,boot=yes --zone asia-south1-a --tags=allow-iap-ssh \
+--subnet=[REDACTED]
+
+# Create a new logging bucket in the specified location
+gcloud logging buckets create default-asia-south1 --location=asia-south1
+
+# List logging buckets after creation
+gcloud logging buckets list
+
+# Update a logging sink to point to a specific bucket location
+gcloud logging sinks update _Default logging.googleapis.com/projects/[REDACTED]/locations/asia-south1/buckets/default-asia-south1
+
+# List logging sinks
+gcloud logging sinks list
+
+# Disable a specific logging sink
+gcloud logging sinks update _Default --disabled
+
+# Incorrect command (no-disabled is not valid), likely meant to re-enable
+gcloud logging sinks update _Default --no-disabled
+
+# Add IAM policy binding to a KMS key for encryption/decryption
+gcloud kms keys add-iam-policy-binding --project=[REDACTED] \
+--member serviceAccount:[REDACTED]@gcp-sa-logging.iam.gserviceaccount.com \
+--role roles/cloudkms.cryptoKeyEncrypterDecrypter \
+--location=asia-south1 \
+--keyring=[REDACTED] \
+[REDACTED]
+
+# Iterate over a list of projects to list logging buckets
+for i in $(cat projects.txt | awk '{print $1}' | grep -v PROJECT_ID); do 
+    echo $i;
+    gcloud logging buckets list | grep "default"; 
+done
+
+# Retrieve KMS service account from logging settings
+kms_sa=$(gcloud logging settings describe | grep kms | cut -d " " -f 2)
+
+# Add IAM policy binding to a project to allow a group to encrypt/decrypt with KMS
+gcloud projects add-iam-policy-binding [REDACTED] --member=group:[REDACTED]@dgg.com \
+--role=roles/cloudkms.cryptoKeyEncrypterDecrypter
+
+# Install ASM CLI for a specific project and cluster with all features enabled
+asmcli install --project_id [REDACTED] --cluster_name [REDACTED] --cluster_location asia-south1 --fleet_id [REDACTED] --output_dir . --enable_all --ca mesh_ca
+
+# List all service accounts in the project
+gcloud iam service-accounts list
+
+# Read logging data for GCE instances (partial command with an incorrect newline)
+gcloud logging read "resource.type=gce_instance"
+
+# Assign multiple IAM roles to a group for a specific project
+gcloud projects add-iam-policy-binding [REDACTED] --member=group:[REDACTED]@rty.com --role=roles/compute.osLogin
+
+# List firewall rule properties with specific filtering criteria
+gcloud compute firewall-rules list --format="table( \
+    name,network, sourceRanges.list():label=SRC_RANGES, \
+    destinationRanges.list():label=DEST_RANGES, \
+    allowed[].map().firewall_rule().list():label=ALLOW, \
+    denied[].map().firewall_rule().list():label=DENY, \
+    sourceTags.list():label=SRC_TAGS, \
+    sourceServiceAccounts.list():label=SRC_SVC_ACCT, \
+    targetTags.list():label=TARGET_TAGS)" | grep "\-dr" | grep "0.0.0"
+
+# List DNS managed zones
+gcloud dns managed-zones list
+
+# List DNS record sets within a specific DNS zone
+gcloud dns record-sets list --zone [REDACTED]
+
+# List folder IDs under a specific folder (replace YOUR_FOLDER_ID with a valid ID)
+gcloud resource-manager folders list --folder=YOUR_FOLDER_ID
+
+# List folder IDs under an organization (organization ID should be specified)
+gcloud resource-manager folders list --organization=YOUR_ORGANIZATION_ID --folder=YOUR_FOLDER_ID
+
+# List private service connect IPs with a purpose of VPC peering
+gcloud compute addresses list --filter="purpose=VPC_PEERING" --format="value(name,region,address)"
+
+# List VPC peerings for specific networks
+gcloud services vpc-peerings list --network=[REDACTED]-app
+
+# List global compute addresses used for VPC peering
+gcloud compute addresses list --global --filter="purpose=VPC_PEERING"
+
+# View the output of the serial console for a specific instance
+gcloud compute instances get-serial-port-output instancename
+
+# Delete a secret
+gcloud secrets delete secret_name
+
+# Access a specific version of a secret
+gcloud secrets versions access 1 --secret=[REDACTED]-private-key
+
+# Access the latest version of a secret
+gcloud secrets versions access latest --secret=[REDACTED]-cert
+
+# Get logs with a specified log name and project ID
+gcloud logging read "logName: projects/[REDACTED]/logs/cloudaudit.googleapis.com" --project=[REDACTED]
+
+# Create ingress secrets with specified replication locations and data files
+gcloud secrets create [REDACTED]-cert --data-file=./server.crt --locations asia-south1,asia-south2 --replication-policy=user-managed
+
+# Update a GKE cluster to enable master authorized networks (Use caution with 0.0.0.0/0)
+gcloud container clusters update [REDACTED] --zone=asia-south1 --enable-master-authorized-networks --master-authorized-networks=0.0.0.0/0
+
+# Enable Anthos Service Mesh for a project and register a GKE cluster
+gcloud container fleet mesh enable --project ${local.project_id} --no-user-output-enabled
+
+# Register the GKE cluster for fleet management
+gcloud container fleet memberships register ${module.gke.name} \
+    --gke-uri=https://container.googleapis.com/v1/projects/${local.project_id}/locations/${local.region}/clusters/${module.gke.name} \
+    --enable-workload-identity --project ${local.project_id} --no-user-output-enabled
+
+# Update GKE cluster labels with the mesh ID
+gcloud container clusters update --project ${local.project_id} ${module.gke.name} --region ${local.region} --update-labels mesh_id=proj-${local.project_number}
+
+# Update fleet mesh management settings for the cluster
+gcloud container fleet mesh update --management automatic --memberships ${module.gke.name} --project ${local.project_id}
+
+# Enable and apply ACM (Anthos Config Management)
+gcloud beta container fleet config-management enable --project ${local.project_id}
+gcloud beta container fleet config-management apply --membership=${module.gke.name} --config=acm.yaml --project=${local.project_id}
+sleep 30
+
+# Add IAM policy binding for a service account for workload identity
+gcloud iam service-accounts add-iam-policy-binding --role roles/iam.workloadIdentityUser \
+    --member "serviceAccount:${local.project_id}.svc.id.goog[config-management-system/root-reconciler]" ${local.gke_service_account} \
+    --project=${local.project_id}
+
+# Remove IAM policy binding for a specific service account
+gcloud projects remove-iam-policy-binding [REDACTED] \
+    --member=serviceAccount:[REDACTED] --role=roles/owner
+
+# Revoke IAM policy binding for a specific user (quiet mode)
+gcloud iam revoke-iam-policy-binding [REDACTED] --member=user:[REDACTED] --quiet
+
+# Describe hub memberships and decode registration token for a cluster
+gcloud container hub memberships describe <cluster-name> --project=<host-project-id> --format='value(spec.endpoint)' | base64 -d | jq -r '.registration_token'
+
+# Delete public IP for a VM instance
+gcloud compute instances delete-access-config fix-envoy-vm --zone=asia-south1-a --access-config-name="external-nat"
+
+# Add network tags to a VM instance
+gcloud compute instances add-tags [REDACTED] --tags=asia-south1,egress-internet,extfw-f5
+
+# List VM instances and filter by tags
+gcloud compute instances list --format="table(name,status,tags.list())" | grep f5
+
+# Get IAM policy for a source repository
+gcloud source repos get-iam-policy bootstrapabc-def-ghi-jkl-repo
+
+# Clone a source repository
+gcloud source repos clone abc-def-ghi-jkl-repo
+
+# Create a monitoring channel using a JSON configuration file
+gcloud beta monitoring channels create --channel-content-from-file=uat.json
+
+# Delete a specific notification channel
+gcloud beta monitoring channels delete "projects/[REDACTED]/notificationChannels/[REDACTED]"
+
+# Add IAM policy binding to grant owner role to a service account
+gcloud projects add-iam-policy-binding --member=serviceAccount:[REDACTED] --role=roles/owner [PROJECT_ID]
+
+# Check IAM policy for a project and format the output
+gcloud projects get-iam-policy --flatten="bindings[].members[]" --format='table(bindings.role, bindings.members)' [REDACTED]
+
+# List all compute disks without users
+gcloud compute disks list --filter="-users:*"
+
+# Delete compute disks that are not associated with any users
+gcloud compute disks delete $(gcloud compute disks list --filter="-users:*" --format "value(name)")
+
+# Transfer files securely between local and compute instances
+gcloud compute scp --zone asia-south1-c [INSTANCE_NAME]:/path/to/file ~/Documents/ --project [PROJECT_ID]
+
+# List compute instances with specific tags
+gcloud compute instances list --format="table(name,zone,tags)" --project [PROJECT_ID] | grep asia-south1
+
+# Create a new compute instance with a RHEL image
+gcloud compute instances create encry-vm --project [PROJECT_ID] --image [IMAGE_NAME] --image-project [IMAGE_PROJECT] --subnet [SUBNET_URL] --zone asia-south1-a --tags=allow-iap-ssh
+
+# Update SQL instance with database flags
+gcloud sql instances patch [SQL_INSTANCE_NAME] --database-flags flag1,flag2
+
+# List SQL users for a specific instance
+gcloud sql users list --instance=[SQL_INSTANCE_NAME]
+
+# Patch SQL instance to disable deletion protection
+gcloud sql instances patch [SQL_INSTANCE_NAME] --no-deletion-protection
+
+# Create an SSL certificate
+gcloud compute ssl-certificates create [CERT_NAME] --certificate [CERT_FILE] --private-key [KEY_FILE]
+
+# List SSL certificates
+gcloud compute ssl-certificates list
+
+# Describe a specific SSL certificate
+gcloud compute ssl-certificates describe [CERT_NAME]
+
+# Update GKE cluster to enable master authorized networks
+gcloud container clusters update [CLUSTER_NAME] --enable-master-authorized-networks --master-authorized-networks 0.0.0.0/0 --zone asia-south1
+
+# Retrieve GKE cluster credentials for kubectl access
+gcloud container clusters get-credentials [CLUSTER_NAME] --zone asia-south1 --project [PROJECT_ID]
+
+# Register a GKE cluster with a fleet
+gcloud container fleet memberships register [CLUSTER_NAME] --gke-uri [GKE_URI] --enable-workload-identity --project [PROJECT_ID]
+
+# List fleet memberships
+gcloud container fleet memberships list

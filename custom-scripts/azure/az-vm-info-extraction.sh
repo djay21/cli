@@ -1,3 +1,5 @@
+### This script automates the extraction and processing of network interface and virtual machine (VM) details from Azure. It gathers information about subnets, virtual machines, and their IP addresses and then organizes and displays this information in a structured manner. The output is written to a file (data.txt), and the data is formatted and displayed using the column command.
+
 #set -aux
 az network nic list | jq '.[] | .ipConfigurations[].subnet.id + " " + .virtualMachine.id' | cut -d "/" -f 5,9,11,19 --output-delimiter " # " | tr -d "\"" > vnet_subnet.txt
 az vm list-ip-addresses --query "[].virtualMachine.[name,resourceGroup,network.privateIpAddresses,network.publicIpAddresses[].ipAddress]" -o table > ip.txt

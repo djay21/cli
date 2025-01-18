@@ -1,0 +1,38 @@
+#to login
+az auth login
+
+#to show the current account
+az account show 
+
+#reseting the app registration creds
+az ad sp credential reset --name APP_ID
+
+#to show all the vm details
+az vm list-ip-addresses --query "[].virtualMachine.[{VMNAME:name,RESOURCE_GROUP:resourceGroup,PRIVATE_IP:network.privateIpAddresses,PUBLIC_IP:network.publicIpAddresses.ipAddress}]" -o json
+
+#to show subnet vnet details
+az network nic list | jq '.[] | .ipConfigurations[].subnet.id + " " + .virtualMachine.id' | cut -d "/" -f 5,9,11,19 --output-delimiter " # " | tr -d "\"" > vnet_subnet.txt
+
+#to show subnet range
+az network vnet subnet show -g $a --vnet-name $b -n $c | jq '.addressPrefix';
+
+# Fetches workload identity settings of an AKS cluster
+az aks show --resource-group <resource-group> --name <aks-cluster-name> --query "securityProfile.workloadIdentity"
+
+# Sets the Azure subscription context for subsequent Azure CLI commands
+az account set --subscription "<subscription-name>"
+
+# Lists all keys in a specified Azure Key Vault
+az keyvault key list --vault-name <keyvault-name>
+
+# Lists all certificates in a specified Azure Key Vault
+az keyvault certificate list --vault-name <keyvault-name>
+
+# Downloads a specified certificate from Azure Key Vault
+az keyvault certificate download --vault-name <keyvault-name> --name <certificate-name> --file cert.pem
+
+# Shows a specific key from Azure Key Vault
+az keyvault key show --vault-name <keyvault-name> --name <key-name> --output json
+
+# Downloads a specified key from Azure Key Vault
+az keyvault key download --vault-name <keyvault-name> --name <key-name> -f priv.key
